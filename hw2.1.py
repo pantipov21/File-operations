@@ -4,7 +4,7 @@
 cook_book = dict()
 
 
-def read_cook_book(filename):
+def read_cook_book(filename, debug=False):
     with open(filename, 'r') as f:
         while True:
             content = '\n'
@@ -26,11 +26,13 @@ def read_cook_book(filename):
                 recipe.append(recipe_dict)
 
             cook_book[name] = recipe
-    for k,v in cook_book.items():
-        print(f'{k}')
-        for v2 in v:
-            print(v2)
-        print('')
+
+    if debug == True:
+        for k,v in cook_book.items():
+            print(f'{k}')
+            for v2 in v:
+                print(v2)
+            print('')
 
 
 #
@@ -41,13 +43,19 @@ def get_shop_list_by_dishes(dishes, person_count):
     for dish in dishes:
         ingredients = cook_book.get(dish)
         for i in ingredients:
-            res[i.get('ingredient_name')] = {'measure': i.get('measure'),
-                                             'quantity': person_count*int(i.get('quantity'))}
-    for k,v in res.items():
+            if i.get('ingredient_name') not in res.keys(): # фильтрация повторяющихся ингридиентов
+                res[i.get('ingredient_name')] = {'measure': i.get('measure'),
+                                                 'quantity': person_count*int(i.get('quantity'))}
+            else: # и обновление количества
+                res[i.get('ingredient_name')].update({'quantity': res[i.get('ingredient_name')].get('quantity')
+                                                                  + person_count * int(i.get('quantity'))})
+
+    for k, v in res.items():
         print(f'{k}:{v}')
     return res
 
 
-read_cook_book('files/recipes.txt')
-print('-------------------------------------')
-get_shop_list_by_dishes(['Запеченный картофель', 'Омлет'],2)
+read_cook_book('files/recipes.txt', True)
+print('------ Список закупок ------')
+get_shop_list_by_dishes(['Омлет', 'Омлет'],1)
+#get_shop_list_by_dishes(['Запеченный картофель', 'Омлет'],2)
